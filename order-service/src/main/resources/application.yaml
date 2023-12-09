@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - prometheus
+---
+spring:
+  cloud:
+    function:
+      definition: supplier;consumer
+    stream:
+      bindings:
+        supplier-out-0:
+          destination: order-created
+          group: order-service
+        consumer-in-0:
+          destination: order-updated
+          group: order-service
+      kafka:
+        binder:
+          brokers: localhost
+          defaultBrokerPort: 9094
+  jpa:
+    defer-datasource-initialization: true
+  kafka:
+    bootstrapServers: localhost:9094
