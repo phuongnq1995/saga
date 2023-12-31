@@ -1,5 +1,6 @@
 package org.phuongnq.order.service;
 
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.phuongnq.dto.request.OrchestratorRequestDTO;
 import org.phuongnq.dto.request.OrderRequestDTO;
@@ -17,6 +18,7 @@ import reactor.core.publisher.Sinks;
 import java.util.Map;
 
 @Service
+@Observed(name = "orderService")
 @RequiredArgsConstructor
 public class OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);

@@ -1,5 +1,8 @@
 server:
   port: 8080
+logging:
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
 
 management:
   endpoints:
@@ -7,8 +10,14 @@ management:
       exposure:
         include:
           - prometheus
+
+  metrics.distribution.percentiles-histogram.http.server.requests: true
+  tracing.sampling.probability: 1.0
+
 ---
 spring:
+  h2:
+    console.enabled: true
   cloud:
     function:
       definition: supplier;consumer
