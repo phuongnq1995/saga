@@ -1,5 +1,6 @@
 server:
   port: 8080
+
 logging:
   pattern:
     level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
@@ -16,6 +17,8 @@ management:
 
 ---
 spring:
+  application:
+    name: order-service
   h2:
     console.enabled: true
   cloud:

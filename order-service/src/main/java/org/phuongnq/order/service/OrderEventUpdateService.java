@@ -18,5 +18,4 @@ public class OrderEventUpdateService {
                 .flatMap(repository::save)
                 .then();
     }
-
 }

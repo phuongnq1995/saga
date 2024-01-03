@@ -1,5 +1,6 @@
 package org.phuongnq.saga.service;
 
+import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 import org.phuongnq.dto.request.InventoryRequestDTO;
 import org.phuongnq.dto.request.OrchestratorRequestDTO;
@@ -8,6 +9,8 @@ import org.phuongnq.dto.response.OrchestratorResponseDTO;
 import org.phuongnq.enums.OrderStatus;
 import org.phuongnq.saga.service.steps.InventoryStep;
 import org.phuongnq.saga.service.steps.PaymentStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,7 +22,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrchestratorService {
-
+    private static final Logger log = LoggerFactory.getLogger(OrchestratorService.class);
     @Qualifier("payment")
     private final WebClient paymentClient;
 
