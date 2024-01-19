@@ -1,6 +1,7 @@
 package org.phuongnq.order.service;
 
 import io.micrometer.observation.annotation.Observed;
+import io.micrometer.tracing.Tracer;
 import lombok.RequiredArgsConstructor;
 import org.phuongnq.dto.request.OrchestratorRequestDTO;
 import org.phuongnq.dto.request.OrderRequestDTO;
@@ -29,13 +30,17 @@ public class OrderService {
             3, 300d
     );
 
+    private final Tracer tracer;
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final Sinks.Many<OrchestratorRequestDTO> sink;
 
     public Mono<PurchaseOrder> createOrder(OrderRequestDTO orderRequestDTO) {
         log.info("Creating order <{}>", orderRequestDTO.toString());
         return purchaseOrderRepository.save(dtoToEntity(orderRequestDTO))
-                .doOnNext(e -> orderRequestDTO.setOrderId(e.getId()))
+                .doOnNext(e -> {
+                    orderRequestDTO.setOrderId(e.getId());
+                    orderRequestDTO.setTraceId(tracer.currentSpan().context().traceId());
+                })
                 .doOnNext(e -> emitEvent(orderRequestDTO));
     }
 

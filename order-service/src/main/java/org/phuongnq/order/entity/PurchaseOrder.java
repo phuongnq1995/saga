@@ -8,7 +8,6 @@ import org.springframework.data.annotation.Id;
 import java.util.UUID;
 
 @Data
-@ToString
 public class PurchaseOrder {
 
     @Id

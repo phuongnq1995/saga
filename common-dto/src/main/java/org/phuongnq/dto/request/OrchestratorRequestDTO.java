@@ -12,5 +12,4 @@ public class OrchestratorRequestDTO {
     private UUID orderId;
     private Double amount;
 
-
 }

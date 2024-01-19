@@ -73,8 +73,6 @@ services:
       - ./docker/config/prometheus.yaml:/etc/prometheus/prometheus.yaml
     command:
       - '--config.file=/etc/prometheus/prometheus.yaml'
-    networks:
-      - kafka
 
   grafana:
     image: grafana/grafana-oss:8.5.2
@@ -83,6 +81,7 @@ services:
       - "3000:3000"
     volumes:
       - grafana-storage:/var/lib/grafana
+      - ./docker/grafana:/etc/grafana/provisioning/datasources:ro
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -105,10 +104,10 @@ services:
     extra_hosts: ['host.docker.internal:host-gateway']
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
-      - ./docker/config/tempo-local.yaml:/etc/tempo.yaml:ro
+      - ./docker/config/tempo.yaml:/etc/tempo.yaml:ro
       - ./docker/data/tempo:/tmp/tempo
     ports:
-      - "14268"  # jaeger ingest
+      - "3110:3100"  # Tempo
       - "9411:9411" # zipkin
 
 networks:
