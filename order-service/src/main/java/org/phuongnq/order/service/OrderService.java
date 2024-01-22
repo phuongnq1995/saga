@@ -30,7 +30,6 @@ public class OrderService {
             3, 300d
     );
 
-    private final Tracer tracer;
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final Sinks.Many<OrchestratorRequestDTO> sink;
 
@@ -39,7 +38,6 @@ public class OrderService {
         return purchaseOrderRepository.save(dtoToEntity(orderRequestDTO))
                 .doOnNext(e -> {
                     orderRequestDTO.setOrderId(e.getId());
-                    orderRequestDTO.setTraceId(tracer.currentSpan().context().traceId());
                 })
                 .doOnNext(e -> emitEvent(orderRequestDTO));
     }

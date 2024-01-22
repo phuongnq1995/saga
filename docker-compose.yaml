@@ -3,7 +3,7 @@ version: "3.8"
 services:
   kafka:
     image: docker.io/bitnami/kafka:3.6
-    container_name: kafka
+    container_name: saga_kafka
     ports:
       - "9092:9092"
       - "9094:9094"
@@ -33,7 +33,7 @@ services:
 
   kafka-exporter:
     image: docker.io/bitnami/kafka-exporter:1.7.0
-    container_name: kafka-exporter
+    container_name: saga_kafka-exporter
     ports:
       - "9308:9308"
     depends_on:
@@ -50,25 +50,11 @@ services:
       retries: 3
       start_period: 5s
 
-#  kafka-ui:
-#    image: provectuslabs/kafka-ui:latest
-#    container_name: kafka-ui
-#    ports:
-#      - "9033:8080"
-#    volumes:
-#      - ./docker/config/kafka-ui-config.yml:/etc/kafkaui/dynamic_config.yaml
-#    environment:
-#      DYNAMIC_CONFIG_ENABLED: 'true'
-#    networks:
-#      - kafka
-#    depends_on:
-#      - kafka
-
   prometheus:
     image: prom/prometheus:v2.48.0
     ports:
       - "9090:9090"
-    container_name: prometheus
+    container_name: saga_prometheus
     volumes:
       - ./docker/config/prometheus.yaml:/etc/prometheus/prometheus.yaml
     command:
@@ -76,7 +62,7 @@ services:
 
   grafana:
     image: grafana/grafana-oss:8.5.2
-    container_name: grafana
+    container_name: saga_grafana
     ports:
       - "3000:3000"
     volumes:

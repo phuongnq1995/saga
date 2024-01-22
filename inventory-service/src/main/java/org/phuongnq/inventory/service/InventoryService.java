@@ -1,51 +1,56 @@
 package org.phuongnq.inventory.service;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.phuongnq.dto.request.InventoryRequestDTO;
 import org.phuongnq.dto.response.InventoryResponseDTO;
 import org.phuongnq.enums.InventoryStatus;
+import org.phuongnq.inventory.repository.InventoryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.Map;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
 public class InventoryService {
     private static final Logger log = LoggerFactory.getLogger(InventoryService.class);
-    private Map<Integer, Integer> productInventoryMap;
+    private final InventoryRepository inventoryRepository;
 
-    @PostConstruct
-    private void init() {
-        this.productInventoryMap = new HashMap<>();
-        this.productInventoryMap.put(1, 5);
-        this.productInventoryMap.put(2, 5);
-        this.productInventoryMap.put(3, 5);
+    public Mono<InventoryResponseDTO> deductInventory(final InventoryRequestDTO requestDTO) {
+        return inventoryRepository.findById(requestDTO.getProductId())
+                .flatMap(inventory -> {
+                    if (inventory.getQuantity() > 0) {
+                        inventory.setQuantity(inventory.getQuantity() - 1);
+                        log.info("Deduct Inventory, Remaining: " + inventory);
+                        return inventoryRepository.save(inventory);
+                    }
+                    throw new IllegalArgumentException();
+                })
+                .map(payment -> {
+                    InventoryResponseDTO responseDTO = new InventoryResponseDTO();
+                    responseDTO.setOrderId(requestDTO.getOrderId());
+                    responseDTO.setUserId(requestDTO.getUserId());
+                    responseDTO.setProductId(requestDTO.getProductId());
+                    responseDTO.setStatus(InventoryStatus.AVAILABLE);
+                    return responseDTO;
+                })
+                .onErrorResume(throwable -> {
+                    InventoryResponseDTO responseDTO = new InventoryResponseDTO();
+                    responseDTO.setOrderId(requestDTO.getOrderId());
+                    responseDTO.setUserId(requestDTO.getUserId());
+                    responseDTO.setProductId(requestDTO.getProductId());
+                    responseDTO.setStatus(InventoryStatus.UNAVAILABLE);
+                    return Mono.just(responseDTO);
+                });
     }
 
-    public InventoryResponseDTO deductInventory(final InventoryRequestDTO requestDTO) {
-        int quantity = productInventoryMap.getOrDefault(requestDTO.getProductId(), 0);
-        InventoryResponseDTO responseDTO = new InventoryResponseDTO();
-        responseDTO.setOrderId(requestDTO.getOrderId());
-        responseDTO.setUserId(requestDTO.getUserId());
-        responseDTO.setProductId(requestDTO.getProductId());
-        responseDTO.setStatus(InventoryStatus.UNAVAILABLE);
-        if (quantity > 0) {
-            responseDTO.setStatus(InventoryStatus.AVAILABLE);
-            this.productInventoryMap.put(requestDTO.getProductId(), quantity - 1);
-        }
-        log.info("deductInventory");
-        log.info("Remaining: " + productInventoryMap.toString());
-        return responseDTO;
-    }
-
-    public void addInventory(final InventoryRequestDTO requestDTO) {
-        this.productInventoryMap
-                .computeIfPresent(requestDTO.getProductId(), (k, v) -> v + 1);
-        log.info("addInventory");
-        log.info("Remaining: " + productInventoryMap.toString());
+    public Mono<Void> addInventory(final InventoryRequestDTO requestDTO) {
+        return inventoryRepository.findById(requestDTO.getProductId())
+                .flatMap(inventory -> {
+                    inventory.setQuantity(inventory.getQuantity() + 1);
+                    log.info("Add Inventory, Remaining: " + inventory);
+                    return inventoryRepository.save(inventory);
+                })
+                .then();
     }
 }

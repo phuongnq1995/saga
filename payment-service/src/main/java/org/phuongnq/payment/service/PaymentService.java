@@ -1,45 +1,60 @@
 package org.phuongnq.payment.service;
 
-import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.phuongnq.dto.request.PaymentRequestDTO;
 import org.phuongnq.dto.response.PaymentResponseDTO;
 import org.phuongnq.enums.PaymentStatus;
+import org.phuongnq.payment.entity.Payment;
+import org.phuongnq.payment.repository.PaymentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.Map;
+import reactor.core.publisher.Mono;
 
 @Service
+@RequiredArgsConstructor
 public class PaymentService {
 
-    private Map<Integer, Double> userBalanceMap;
+    private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
+    private final PaymentRepository paymentRepository;
 
-    @PostConstruct
-    private void init() {
-        this.userBalanceMap = new HashMap<>();
-        this.userBalanceMap.put(1, 1000d);
-        this.userBalanceMap.put(2, 1000d);
-        this.userBalanceMap.put(3, 1000d);
+    public Mono<PaymentResponseDTO> debit(final PaymentRequestDTO requestDTO) {
+        log.info("Debit request {}", requestDTO);
+        return paymentRepository.findById(requestDTO.getUserId())
+                .flatMap(payment -> {
+                    if (payment.getBalance() >= requestDTO.getAmount()) {
+                        payment.setBalance(payment.getBalance() - requestDTO.getAmount());
+                        log.info("Debit, Balance of user {}", payment);
+                        return paymentRepository.save(payment);
+                    }
+                    throw new IllegalArgumentException();
+                })
+                .map(payment -> {
+                    PaymentResponseDTO responseDTO = new PaymentResponseDTO();
+                    responseDTO.setUserId(requestDTO.getUserId());
+                    responseDTO.setOrderId(requestDTO.getOrderId());
+                    responseDTO.setAmount(payment.getBalance());
+                    responseDTO.setStatus(PaymentStatus.PAYMENT_APPROVED);
+                    return responseDTO;
+                })
+                .onErrorResume(throwable -> {
+                    PaymentResponseDTO responseDTO = new PaymentResponseDTO();
+                    responseDTO.setAmount(requestDTO.getAmount());
+                    responseDTO.setUserId(requestDTO.getUserId());
+                    responseDTO.setOrderId(requestDTO.getOrderId());
+                    responseDTO.setStatus(PaymentStatus.PAYMENT_REJECTED);
+                    return Mono.just(responseDTO);
+                });
     }
 
-    public PaymentResponseDTO debit(final PaymentRequestDTO requestDTO) {
-        double balance = this.userBalanceMap.getOrDefault(requestDTO.getUserId(), 0d);
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO();
-        responseDTO.setAmount(requestDTO.getAmount());
-        responseDTO.setUserId(requestDTO.getUserId());
-        responseDTO.setOrderId(requestDTO.getOrderId());
-        responseDTO.setStatus(PaymentStatus.PAYMENT_REJECTED);
-        if (balance >= requestDTO.getAmount()) {
-            responseDTO.setStatus(PaymentStatus.PAYMENT_APPROVED);
-            this.userBalanceMap.put(requestDTO.getUserId(), balance - requestDTO.getAmount());
-        }
-        System.out.println("Remaining: " + userBalanceMap.toString());
-        return responseDTO;
+    public Mono<Void> credit(final PaymentRequestDTO requestDTO) {
+        log.info("Credit request {}", requestDTO);
+        return paymentRepository.findById(requestDTO.getUserId())
+                .flatMap(payment -> {
+                    payment.setBalance(payment.getBalance() + requestDTO.getAmount());
+                    log.info("Credit, Balance of user {}", payment);
+                    return paymentRepository.save(payment);
+                })
+                .then();
     }
-
-    public void credit(final PaymentRequestDTO requestDTO) {
-        this.userBalanceMap.computeIfPresent(requestDTO.getUserId(), (k, v) -> v + requestDTO.getAmount());
-        System.out.println("Remaining: " + userBalanceMap.toString());
-    }
-
 }

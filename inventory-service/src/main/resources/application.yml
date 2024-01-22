@@ -1,0 +1,25 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: inventory-service
+  webflux:
+    base-path: /inventory
+  h2:
+    console.enabled: true
+  jpa:
+    defer-datasource-initialization: true
+
+logging:
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - prometheus
+  metrics.distribution.percentiles-histogram.http.server.requests: true
+  tracing.sampling.probability: 1.0

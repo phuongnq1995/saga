@@ -8,22 +8,22 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("inventory")
+@RequestMapping("/")
 @RequiredArgsConstructor
 public class InventoryController {
 
     private final InventoryService service;
 
     @PostMapping("/deduct")
-    public InventoryResponseDTO deduct(@RequestBody final InventoryRequestDTO requestDTO) {
+    public Mono<InventoryResponseDTO> deduct(@RequestBody final InventoryRequestDTO requestDTO) {
         return service.deductInventory(requestDTO);
     }
 
     @PostMapping("/add")
-    public void add(@RequestBody final InventoryRequestDTO requestDTO) {
-        service.addInventory(requestDTO);
+    public Mono<Void> add(@RequestBody final InventoryRequestDTO requestDTO) {
+        return service.addInventory(requestDTO);
     }
-
 }

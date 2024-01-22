@@ -1,7 +1,5 @@
 package org.phuongnq.saga.service;
 
-import io.micrometer.observation.ObservationRegistry;
-import lombok.RequiredArgsConstructor;
 import org.phuongnq.dto.request.InventoryRequestDTO;
 import org.phuongnq.dto.request.OrchestratorRequestDTO;
 import org.phuongnq.dto.request.PaymentRequestDTO;
@@ -9,8 +7,6 @@ import org.phuongnq.dto.response.OrchestratorResponseDTO;
 import org.phuongnq.enums.OrderStatus;
 import org.phuongnq.saga.service.steps.InventoryStep;
 import org.phuongnq.saga.service.steps.PaymentStep;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -20,17 +16,17 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class OrchestratorService {
-    private static final Logger log = LoggerFactory.getLogger(OrchestratorService.class);
-    @Qualifier("payment")
     private final WebClient paymentClient;
-
-    @Qualifier("inventory")
     private final WebClient inventoryClient;
 
+    public OrchestratorService(@Qualifier("payment") WebClient paymentClient, @Qualifier("inventory") WebClient inventoryClient) {
+        this.paymentClient = paymentClient;
+        this.inventoryClient = inventoryClient;
+    }
+
     public Mono<OrchestratorResponseDTO> orderProduct(final OrchestratorRequestDTO requestDTO) {
-        Workflow orderWorkflow = this.getOrderWorkflow(requestDTO);
+        Workflow orderWorkflow = getOrderWorkflow(requestDTO);
         return Flux.fromStream(() -> orderWorkflow.getSteps().stream())
                 .flatMap(WorkflowStep::process)
                 .handle(((aBoolean, synchronousSink) -> {
@@ -40,21 +36,21 @@ public class OrchestratorService {
                         synchronousSink.error(new WorkflowException("create order failed!"));
                 }))
                 .then(Mono.fromCallable(() -> getResponseDTO(requestDTO, OrderStatus.ORDER_COMPLETED)))
-                .onErrorResume(ex -> this.revertOrder(orderWorkflow, requestDTO));
+                .onErrorResume(ex -> revertOrder(orderWorkflow, requestDTO));
 
     }
 
     private Mono<OrchestratorResponseDTO> revertOrder(final Workflow workflow, final OrchestratorRequestDTO requestDTO) {
         return Flux.fromStream(() -> workflow.getSteps().stream())
-                .filter(wf -> wf.getStatus().equals(WorkflowStepStatus.COMPLETE))
+                .filter(wf -> !wf.getStatus().equals(WorkflowStepStatus.FAILED))
                 .flatMap(WorkflowStep::revert)
                 .retry(3)
-                .then(Mono.just(this.getResponseDTO(requestDTO, OrderStatus.ORDER_CANCELLED)));
+                .then(Mono.just(getResponseDTO(requestDTO, OrderStatus.ORDER_CANCELLED)));
     }
 
     private Workflow getOrderWorkflow(OrchestratorRequestDTO requestDTO) {
-        WorkflowStep paymentStep = new PaymentStep(this.paymentClient, this.getPaymentRequestDTO(requestDTO));
-        WorkflowStep inventoryStep = new InventoryStep(this.inventoryClient, this.getInventoryRequestDTO(requestDTO));
+        WorkflowStep paymentStep = new PaymentStep(paymentClient, getPaymentRequestDTO(requestDTO));
+        WorkflowStep inventoryStep = new InventoryStep(inventoryClient, getInventoryRequestDTO(requestDTO));
         return new OrderWorkflow(List.of(paymentStep, inventoryStep));
     }
 

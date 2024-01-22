@@ -3,14 +3,17 @@ package org.phuongnq.saga.service.steps;
 import org.phuongnq.dto.request.PaymentRequestDTO;
 import org.phuongnq.dto.response.PaymentResponseDTO;
 import org.phuongnq.enums.PaymentStatus;
+import org.phuongnq.saga.service.OrchestratorService;
 import org.phuongnq.saga.service.WorkflowStep;
 import org.phuongnq.saga.service.WorkflowStepStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 public class PaymentStep implements WorkflowStep {
-
+    private static final Logger log = LoggerFactory.getLogger(PaymentStep.class);
     private final WebClient webClient;
     private final PaymentRequestDTO requestDTO;
     private WorkflowStepStatus stepStatus = WorkflowStepStatus.PENDING;
@@ -39,6 +42,7 @@ public class PaymentStep implements WorkflowStep {
 
     @Override
     public Mono<Boolean> revert() {
+        log.info("Revert Payment {}", requestDTO);
         return this.webClient
                 .post()
                 .uri("/payment/credit")
