@@ -26,4 +26,8 @@ public class OrderController {
         return service.getAll();
     }
 
+    @DeleteMapping
+    public Mono<Void> cleanData() {
+        return service.cleanData();
+    }
 }

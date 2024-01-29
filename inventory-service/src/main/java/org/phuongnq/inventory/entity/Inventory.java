@@ -1,9 +1,18 @@
 package org.phuongnq.inventory.entity;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
+import lombok.NoArgsConstructor;
 
+
+@Entity
+@Table
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Inventory {
 
     @Id

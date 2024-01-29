@@ -1,13 +1,20 @@
 package org.phuongnq.payment.entity;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.phuongnq.enums.OrderStatus;
-import org.springframework.data.annotation.Id;
+import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+import java.io.Serializable;
 
+@Entity
+@Table
 @Data
-public class Payment {
+@AllArgsConstructor
+@NoArgsConstructor
+public class Payment implements Serializable {
 
     @Id
     private Integer userId;

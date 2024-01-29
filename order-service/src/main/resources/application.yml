@@ -15,12 +15,13 @@ management:
   metrics.distribution.percentiles-histogram.http.server.requests: true
   tracing.sampling.probability: 1.0
 
----
 spring:
   application:
     name: order-service
-  h2:
-    console.enabled: true
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/order
+    username: postgres
+    password: postgres
   cloud:
     function:
       definition: supplier;consumer
@@ -38,5 +39,10 @@ spring:
           defaultBrokerPort: 9094
   jpa:
     defer-datasource-initialization: true
-  kafka:
-    bootstrapServers: localhost:9094
+    database: postgresql
+    show-sql: true
+    generate-ddl: true
+    open-in-view: false
+  sql:
+    init:
+      mode: ALWAYS

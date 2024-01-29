@@ -1,9 +1,7 @@
 package org.phuongnq.inventory.repository;
 
 import org.phuongnq.inventory.entity.Inventory;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
-public interface InventoryRepository extends ReactiveCrudRepository<Inventory, Integer> {
+public interface InventoryRepository extends JpaRepository<Inventory, Integer> {
 }

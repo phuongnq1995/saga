@@ -4,11 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.phuongnq.dto.request.PaymentRequestDTO;
 import org.phuongnq.dto.response.PaymentResponseDTO;
 import org.phuongnq.payment.service.PaymentService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,12 +15,19 @@ public class PaymentController {
     private final PaymentService service;
 
     @PostMapping("/debit")
-    public Mono<PaymentResponseDTO> debit(@RequestBody PaymentRequestDTO requestDTO) {
-        return service.debit(requestDTO);
+    public ResponseEntity<PaymentResponseDTO> debit(@RequestBody PaymentRequestDTO requestDTO) {
+        return ResponseEntity.ok(service.debit(requestDTO));
     }
 
     @PostMapping("/credit")
-    public Mono<Void> credit(@RequestBody PaymentRequestDTO requestDTO) {
-        return service.credit(requestDTO);
+    public ResponseEntity<Void> credit(@RequestBody PaymentRequestDTO requestDTO) {
+        service.credit(requestDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> cleanData() {
+        service.cleanData();
+        return ResponseEntity.ok().build();
     }
 }

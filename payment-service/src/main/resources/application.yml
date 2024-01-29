@@ -1,15 +1,22 @@
 server:
   port: 8082
+  servlet:
+    context-path: /payment
 
 spring:
   application:
     name: payment-service
-  webflux:
-    base-path: /payment
-  h2:
-    console.enabled: true
+  datasource:
+    url: jdbc:postgresql://localhost:25432/payment
+    username: postgres
+    password: postgres
   jpa:
-    defer-datasource-initialization: true
+    database: postgresql
+    show-sql: true
+    generate-ddl: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
 
 logging:
   pattern:

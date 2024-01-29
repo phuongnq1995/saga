@@ -1,6 +1,36 @@
 version: "3.8"
 
 services:
+  order-db:
+    image: 'postgres:15.2'
+    container_name: saga_order_db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=order
+
+  payment-db:
+    image: 'postgres:15.2'
+    container_name: saga_payment_db
+    ports:
+      - "25432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=payment
+
+  inventory-db:
+    image: 'postgres:15.2'
+    container_name: saga_inventory_db
+    ports:
+      - "15432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=inventory
+
   kafka:
     image: docker.io/bitnami/kafka:3.6
     container_name: saga_kafka
