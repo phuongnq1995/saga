@@ -6,7 +6,9 @@ import org.phuongnq.dto.request.OrchestratorRequestDTO;
 import org.phuongnq.dto.request.OrderRequestDTO;
 import org.phuongnq.dto.response.OrderResponseDTO;
 import org.phuongnq.enums.OrderStatus;
+import org.phuongnq.order.entity.Product;
 import org.phuongnq.order.entity.PurchaseOrder;
+import org.phuongnq.order.repository.ProductRepository;
 import org.phuongnq.order.repository.PurchaseOrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,43 +20,42 @@ import reactor.core.publisher.Sinks;
 import java.util.Map;
 
 @Service
-@Observed(name = "orderService")
 @RequiredArgsConstructor
 public class OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
-    // product price map
-    private static final Map<Integer, Double> PRODUCT_PRICE = Map.of(
-            1, 100d,
-            2, 200d,
-            3, 300d
-    );
-
     private final PurchaseOrderRepository purchaseOrderRepository;
+    private final ProductRepository productRepository;
     private final Sinks.Many<OrchestratorRequestDTO> sink;
 
     public Mono<PurchaseOrder> createOrder(OrderRequestDTO orderRequestDTO) {
         log.info("Creating order <{}>", orderRequestDTO.toString());
-        return purchaseOrderRepository.save(dtoToEntity(orderRequestDTO))
+        return productRepository.findById(orderRequestDTO.getProductId())
+                .map(product -> dtoToEntity(orderRequestDTO, product.getPrice()))
+                .flatMap(purchaseOrderRepository::save)
                 .doOnNext(e -> orderRequestDTO.setOrderId(e.getId()))
-                .doOnNext(e -> emitEvent(orderRequestDTO));
+                .doOnNext(e -> emitEvent(orderRequestDTO, e.getPrice()));
     }
 
-    public Flux<OrderResponseDTO> getAll() {
+    public Flux<OrderResponseDTO> getAllOrders() {
         return purchaseOrderRepository.findAll()
                 .map(this::entityToDto);
     }
 
-    private void emitEvent(OrderRequestDTO orderRequestDTO) {
-        sink.tryEmitNext(getOrchestratorRequestDTO(orderRequestDTO));
+    public Flux<Product> getAllProducts() {
+        return productRepository.findAll();
     }
 
-    private PurchaseOrder dtoToEntity(final OrderRequestDTO dto) {
+    private void emitEvent(OrderRequestDTO orderRequestDTO, Double price) {
+        sink.tryEmitNext(getOrchestratorRequestDTO(orderRequestDTO, price));
+    }
+
+    private PurchaseOrder dtoToEntity(final OrderRequestDTO dto, Double price) {
         PurchaseOrder purchaseOrder = new PurchaseOrder();
         purchaseOrder.setId(dto.getOrderId());
         purchaseOrder.setProductId(dto.getProductId());
         purchaseOrder.setUserId(dto.getUserId());
         purchaseOrder.setStatus(OrderStatus.ORDER_CREATED);
-        purchaseOrder.setPrice(PRODUCT_PRICE.get(purchaseOrder.getProductId()));
+        purchaseOrder.setPrice(price);
         return purchaseOrder;
     }
 
@@ -68,10 +69,10 @@ public class OrderService {
         return dto;
     }
 
-    public OrchestratorRequestDTO getOrchestratorRequestDTO(OrderRequestDTO orderRequestDTO) {
+    public OrchestratorRequestDTO getOrchestratorRequestDTO(OrderRequestDTO orderRequestDTO, Double price) {
         OrchestratorRequestDTO requestDTO = new OrchestratorRequestDTO();
         requestDTO.setUserId(orderRequestDTO.getUserId());
-        requestDTO.setAmount(PRODUCT_PRICE.get(orderRequestDTO.getProductId()));
+        requestDTO.setAmount(price);
         requestDTO.setOrderId(orderRequestDTO.getOrderId());
         requestDTO.setProductId(orderRequestDTO.getProductId());
         return requestDTO;
