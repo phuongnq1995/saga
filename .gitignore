@@ -37,3 +37,4 @@ build/
 .vscode/
 
 !**/src/resource/application-prod.yml
+!**/src/resource/application-secret.yml

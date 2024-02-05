@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  payment-service:
+    container_name: payment-service
+    image: phuongnq1995/saga-payment:latest
+    environment:
+      - 'SPRING_PROFILES_ACTIVE=prod'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://topsy.db.elephantsql.com/obuoolii'
+      - 'SPRING_DATASOURCE_USERNAME=obuoolii'
+      - 'SPRING_DATASOURCE_PASSWORD=J_eTMg19XHPg_jFmecLjehgdhJz4udZK'
+    ports:
+      - 8082:8082
+    networks:
+      - saga-network
+
+  inventory-service:
+    container_name: inventory-service
+    image: phuongnq1995/saga-inventory:latest
+    environment:
+      - 'SPRING_PROFILES_ACTIVE=prod'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://topsy.db.elephantsql.com/gtgoypfc'
+      - 'SPRING_DATASOURCE_USERNAME=gtgoypfc'
+      - 'SPRING_DATASOURCE_PASSWORD=BEPEg_1RKHfIa2uSMc_v6XSoImGRT7BX'
+    ports:
+      - 8081:8081
+    networks:
+      - saga-network
+
+  order-service:
+    container_name: order-service
+    image: phuongnq1995/saga-order:latest
+    environment:
+      - 'SPRING_PROFILES_ACTIVE=prod'
+      - 'SPRING_R2DBC_URL=jdbc:postgresql://topsy.db.elephantsql.com/yxonzvcp'
+      - 'SPRING_R2DBC_USERNAME=yxonzvcp'
+      - 'SPRING_R2DBC_PASSWORD=p1XcfkguHElKvicSJQZxGAcucSWqPGKZ'
+      - 'KAFKA_USERNAME=c21pbGluZy1zdW5iZWFtLTEzOTA4JJereriyCNLjpEaceB-dZfZPqXOo8aIv-TU'
+      - 'KAFKA_PASSWORD=YTA5N2RkMTUtMDQ4MS00OTdhLWJmMTItN2Q5OGI3YzZkYWU5'
+    ports:
+      - 8080:8080
+    networks:
+      - saga-network
+
+  order-orchestrator:
+    container_name: order-orchestrator
+    image: phuongnq1995/saga-orchestrator:latest
+    environment:
+      - 'SPRING_PROFILES_ACTIVE=prod'
+      - 'KAFKA_USERNAME=c21pbGluZy1zdW5iZWFtLTEzOTA4JJereriyCNLjpEaceB-dZfZPqXOo8aIv-TU'
+      - 'KAFKA_PASSWORD=YTA5N2RkMTUtMDQ4MS00OTdhLWJmMTItN2Q5OGI3YzZkYWU5'
+    ports:
+      - 8083:8083
+    networks:
+      - saga-network
+
+networks:
+  saga-network:
+    driver: bridge

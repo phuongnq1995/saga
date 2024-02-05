@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://topsy.db.elephantsql.com/gtgoypfc
+    username: gtgoypfc
+    password: BEPEg_1RKHfIa2uSMc_v6XSoImGRT7BX
