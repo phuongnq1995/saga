@@ -10,8 +10,4 @@ spring:
   r2dbc:
     url: r2dbc:postgresql://topsy.db.elephantsql.com/yxonzvcp
     username: yxonzvcp
-    password: p1XcfkguHElKvicSJQZxGAcucSWqPGKZ
 
-kafka:
-  username: c21pbGluZy1zdW5iZWFtLTEzOTA4JJereriyCNLjpEaceB-dZfZPqXOo8aIv-TU
-  password: YTA5N2RkMTUtMDQ4MS00OTdhLWJmMTItN2Q5OGI3YzZkYWU5

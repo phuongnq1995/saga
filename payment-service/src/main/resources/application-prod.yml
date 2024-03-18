@@ -2,4 +2,3 @@ spring:
   datasource:
     url: jdbc:postgresql://topsy.db.elephantsql.com/obuoolii
     username: obuoolii
-    password: J_eTMg19XHPg_jFmecLjehgdhJz4udZK
