@@ -36,4 +36,5 @@ build/
 ### VS Code ###
 .vscode/
 
-!**/src/main/resource/application-secret.yml
+**/src/main/**/application-secret.yml
+docker-compose-prod.yml

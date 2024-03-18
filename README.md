@@ -2,24 +2,53 @@
 
 This is a sample project to demo saga pattern.
 
-## Prerequisites:
-
-* Kafka cluster
-
-# High Level Architecture
+## High Level Architecture
 
 ![](doc/saga-orchestration.png)
 
-* Prometheus: http://localhost:9090
-* Grafana: http://localhost:3000
-* Order service: http://localhost:8080/webjars/swagger-ui/index.html
+### Context
+
+Consider the real world example for transactions across distributed systems.
+When user process orders, order-service needs manage inventory, and handle payments.
+We need a solution that ensures data consistency and reliability, even in the face of failures or network issues.
+That's where the Saga Pattern comes in.
+
+### Sample Data
+
+Given the hardcode data stored in services
+
+**Order service:**
+
+| Product Id  | Product Name | Price |  
+|-------------|--------------|-------|
+| 1           | Product A    | 100   |
+| 2           | Product B    | 200   |
+| 3           | Product C    | 300   |
+
+**Payment service:**
+
+| User Id | Balance |
+|---------|---------|
+| 1       | 1000    |
+| 2       | 1000    |
+| 3       | 1000    |
+
+**Inventory service:**
+
+| Product Id  | Quantity |
+|-------------|----------|
+| 1           | 5        |
+| 2           | 5        |
+| 3           | 5        |
 
 
-Production info:
+**Production info:**
+
 * Kafka: https://console.upstash.com/kafka/51eacce7-918a-460f-a1ed-9326d5cda6d4
 * Database: https://customer.elephantsql.com/instance
 
-Run prod docker compose
+**Run prod docker compose**
+
 ```
-docker-compose -f docker-compose-prod.yml up
+docker-compose -f docker-compose-prod.yml up -d
 ```
