@@ -10,4 +10,3 @@ spring:
   r2dbc:
     url: r2dbc:postgresql://topsy.db.elephantsql.com/yxonzvcp
     username: yxonzvcp
-

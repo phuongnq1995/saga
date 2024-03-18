@@ -25,5 +25,5 @@ spring:
 ---
 service:
   endpoints:
-    inventory: http://localhost:8081
-    payment: http://localhost:8082
+    inventory: http://localhost:8081/inventory
+    payment: http://localhost:8082/payment

@@ -29,16 +29,14 @@ public class InventoryStep implements WorkflowStep {
 
     @Override
     public Mono<Boolean> process() {
-        var a=  this.webClient
+        return this.webClient
                 .post()
-                .uri("/inventory/deduct")
+                .uri("/deduct")
                 .body(BodyInserters.fromValue(this.requestDTO))
                 .retrieve()
                 .bodyToMono(InventoryResponseDTO.class)
                 .map(r -> r.getStatus().equals(InventoryStatus.AVAILABLE))
                 .doOnNext(b -> this.stepStatus = b ? WorkflowStepStatus.COMPLETE : WorkflowStepStatus.FAILED);
-        System.out.println();
-        return a;
     }
 
     @Override
@@ -46,7 +44,7 @@ public class InventoryStep implements WorkflowStep {
         log.info("Revert Inventory {}", requestDTO);
         return this.webClient
                 .post()
-                .uri("/inventory/add")
+                .uri("/add")
                 .body(BodyInserters.fromValue(this.requestDTO))
                 .retrieve()
                 .bodyToMono(Void.class)

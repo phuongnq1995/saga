@@ -3,7 +3,6 @@ package org.phuongnq.saga.service.steps;
 import org.phuongnq.dto.request.PaymentRequestDTO;
 import org.phuongnq.dto.response.PaymentResponseDTO;
 import org.phuongnq.enums.PaymentStatus;
-import org.phuongnq.saga.service.OrchestratorService;
 import org.phuongnq.saga.service.WorkflowStep;
 import org.phuongnq.saga.service.WorkflowStepStatus;
 import org.slf4j.Logger;
@@ -32,7 +31,7 @@ public class PaymentStep implements WorkflowStep {
     public Mono<Boolean> process() {
         return this.webClient
                 .post()
-                .uri("/payment/debit")
+                .uri("/debit")
                 .body(BodyInserters.fromValue(this.requestDTO))
                 .retrieve()
                 .bodyToMono(PaymentResponseDTO.class)
@@ -45,7 +44,7 @@ public class PaymentStep implements WorkflowStep {
         log.info("Revert Payment {}", requestDTO);
         return this.webClient
                 .post()
-                .uri("/payment/credit")
+                .uri("/credit")
                 .body(BodyInserters.fromValue(this.requestDTO))
                 .retrieve()
                 .bodyToMono(Void.class)
