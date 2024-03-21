@@ -54,6 +54,7 @@ docker-compose -f docker-compose-prod.yml up -d
 ```
 
 **Clean up data**
-http://localhost:8080/webjars/swagger-ui/index.html
-http://localhost:8081/inventory/swagger-ui/index.html
-http://localhost:8082/payment/swagger-ui/index.html
+
+* http://localhost:8080/webjars/swagger-ui/index.html
+* http://localhost:8081/inventory/swagger-ui/index.html
+* http://localhost:8082/payment/swagger-ui/index.html
