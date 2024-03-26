@@ -41,6 +41,9 @@ Given the hardcode data stored in services
 | 2           | 5        |
 | 3           | 5        |
 
+## Live demo
+
+[![Watch the video](https://img.youtube.com/vi/i7HbwnqPdWg/maxresdefault.jpg)](https://youtu.be/i7HbwnqPdWg)
 
 **Production info:**
 
